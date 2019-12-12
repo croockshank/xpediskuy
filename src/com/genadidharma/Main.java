@@ -156,7 +156,7 @@ public class Main {
         int serviceIndex;
         String receiptNumber;
         float packagingPrice;
-        int subTotal = 0, total, money;
+        int weightAndDimension = 0, subTotal, total, money;
         char selected;
         int packageAmount = 0;
 
@@ -211,7 +211,7 @@ public class Main {
 
             //Pilih Kecamatan tujuan
             System.out.println("Kecamatan: ");
-            for (int i = 0; i < districts[originProvinceIndex][destinationCityOrRegencyIndex].length; i++) {
+            for (int i = 0; i < districts[destinationProvinceIndex][destinationCityOrRegencyIndex].length; i++) {
                 System.out.printf("%d. %s\n", i + 1, districts[destinationProvinceIndex][destinationCityOrRegencyIndex][i]);
             }
             destinationDistrictIndex = getDistrictIndex(destinationProvinceIndex, destinationCityOrRegencyIndex, input);
@@ -261,18 +261,14 @@ public class Main {
 
         //Hitung total biaya sebelum biaya pelayanan
         for (int i = 0; i < packageAmount; i++) {
-            subTotal += dimensions[i] > 0 ? (int) Math.ceil(weights[i]) * (int) dimensions[i] : (int) Math.ceil(weights[i]);
+            weightAndDimension += dimensions[i] > 0 ? (int) Math.ceil(weights[i]) + (int) dimensions[i] : (int) Math.ceil(weights[i]);
         }
-        subTotal *= distance;
-
-        //Bulatkan sub total ke ratusan terdekat
-        subTotal = roundToNearestHundred(subTotal);
 
         //Pilih jenis pengiriman
         System.out.println("Jenis pengiriman: ");
         System.out.printf("%s \t\t\t %s \t\t\t\t\t\t %s \t\t %s", "No", "Nama", "Harga", "Estimasi\n");
         for (int i = 0; i < services.length; i++) {
-            System.out.printf("%d \t %s \t\t %s \t\t %d-%d Hari\n", i + 1, services[i], convertRupiah(subTotal * servicesPrice[i]), servicesEstimatedTime[i][0], servicesEstimatedTime[i][1]);
+            System.out.printf("%d \t %s \t\t %s \t\t %d-%d Hari\n", i + 1, services[i], convertRupiah(roundToNearestThousand(servicesPrice[i] * (int) distance * weightAndDimension)), servicesEstimatedTime[i][0], servicesEstimatedTime[i][1]);
         }
         serviceIndex = getServiceIndex(input);
 
@@ -280,10 +276,13 @@ public class Main {
         receiptNumber = generateReceiptNumber();
 
         //Hitung total biaya packaging
-        packagingPrice = roundToNearestHundred((int) calculatePackagingPrice(surfaceAreas, packagingIndexes, packageAmount));
+        packagingPrice = roundToNearestThousand((int) calculatePackagingPrice(surfaceAreas, packagingIndexes, packageAmount));
 
-        //Hitung sub total dan packaging
-        total = subTotal * servicesPrice[serviceIndex] + (int) packagingPrice;
+        //Hitung sub total
+        subTotal = roundToNearestThousand(servicesPrice[serviceIndex] * (int) distance * weightAndDimension);
+
+        //Hitung total dan packaging
+        total = subTotal + (int) packagingPrice;
 
         //Tampil data transaksi
         printRecipients(senderName, senderAddress, senderPhone, receiverName, receiverAddress, receiverPhone);
@@ -358,8 +357,8 @@ public class Main {
         return currFormat.format(money);
     }
 
-    private static int roundToNearestHundred(int value) {
-        return ((value + 99) / 100) * 100;
+    private static int roundToNearestThousand(int value) {
+        return Math.round((float) value / 1000) * 1000;
     }
 
     private static int getProvinceIndex(Scanner input) {
@@ -392,8 +391,6 @@ public class Main {
                     similarProvincesIndex[startIndex] = i;
                     startIndex++;
                     if (startIndex == maxInArray) break;
-                } else {
-                    break;
                 }
             }
         }
@@ -531,17 +528,18 @@ public class Main {
     }
 
     private static int getPackagingIndex(Scanner input, float typeIndex, float dimension, int packageAmount) {
-        System.out.println("Pilih Packaging");
         int index = 0, min = 0;
         if (typeIndex > 0 && dimension <= 5) {
-            if (dimension == 0) {
+            if (dimension >= 0 && dimension <= 5 ) {
                 //Kalau barang tapi tidak punya dimensi
+                System.out.println("Pilih Packaging");
                 for (int i = 1; i < packaging.length - 1; i++) {
                     System.out.printf("%d. %s\n", i, packaging[i]);
                 }
                 min = 1;
-            } else if (dimension > 0) {
+            } else if (dimension > 5) {
                 //Kalau barang tapi punya dimensi
+                System.out.println("Pilih Packaging");
                 for (int i = 1; i < packaging.length; i++) {
                     System.out.printf("%d. %s\n", i, packaging[i]);
                 }
@@ -613,7 +611,7 @@ public class Main {
         }
         System.out.println("Data Pengiriman");
         System.out.printf("Jarak            : %.0f km\n", distance);
-        System.out.printf("Sub Total        : %s\n", convertRupiah(subTotal * servicesPrice[indexes[6]]));
+        System.out.printf("Sub Total        : %s\n", convertRupiah(subTotal));
         System.out.printf("Biaya Packaging  : %s\n", convertRupiah(packagingPrice));
         System.out.printf("Total            : %s\n", convertRupiah(total));
     }
