@@ -157,7 +157,7 @@ public class Main {
         String receiptNumber;
         float packagingPrice;
         int weightAndDimension = 0, subTotal, total, money;
-        char selected;
+        char selected, repeat;
         int packageAmount = 0;
 
         int[] packageTypes = new int[maxInArray];
@@ -166,135 +166,148 @@ public class Main {
         float[] dimensions = new float[maxInArray];
         int[] packagingIndexes = new int[maxInArray];
 
-        System.out.println("Data Pengirim");
-        senderName = getStringValue(input, "nama pengirim: ", false);
-        senderAddress = getStringValue(input, "alamat pengirim: ", false);
-        senderPhone = getStringValue(input, "telepon pengirim: (62)", true);
-
-        System.out.println("Data Penerima");
-        receiverName = getStringValue(input, "nama penerima: ", false);
-        receiverAddress = getStringValue(input, "alamat penerima: ", false);
-        receiverPhone = getStringValue(input, "telepon penerima: (62)", true);
-
-        System.out.println("Asal Pengiriman");
-        //Ketik provinsi asal
-        originProvinceIndex = getProvinceIndex(input);
-
-        //Pilih Kabupaten/ Kota asal
-        System.out.println("Kabupaten/ Kota: ");
-        for (int i = 0; i < citiesOrRegencies[originProvinceIndex].length; i++) {
-            System.out.printf("%d. %s\n", i + 1, citiesOrRegencies[originProvinceIndex][i]);
-        }
-        originCityOrRegencyIndex = getCityOrRegencyIndex(originProvinceIndex, input);
-
-        //Pilih Kecamatan asal
-        System.out.println("Kecamatan: ");
-        for (int i = 0; i < districts[originProvinceIndex][originCityOrRegencyIndex].length; i++) {
-            System.out.printf("%d. %s\n", i + 1, districts[originProvinceIndex][originCityOrRegencyIndex][i]);
-        }
-        originDistrictIndex = getDistrictIndex(originProvinceIndex, originCityOrRegencyIndex, input);
-
-        latOrigin = latLngs[originProvinceIndex][originCityOrRegencyIndex][originDistrictIndex][0];
-        lngOrigin = latLngs[originProvinceIndex][originCityOrRegencyIndex][originDistrictIndex][1];
-
         do {
-            System.out.println("Tujuan Pengiriman");
-            //Ketik provinsi tujuan
-            destinationProvinceIndex = getProvinceIndex(input);
 
-            //Pilih Kabupaten/ Kota tujuan
+
+            System.out.println("Data Pengirim");
+            senderName = getStringValue(input, "nama pengirim: ", false);
+            senderAddress = getStringValue(input, "alamat pengirim: ", false);
+            senderPhone = getStringValue(input, "telepon pengirim: (62)", true);
+
+            System.out.println("Data Penerima");
+            receiverName = getStringValue(input, "nama penerima: ", false);
+            receiverAddress = getStringValue(input, "alamat penerima: ", false);
+            receiverPhone = getStringValue(input, "telepon penerima: (62)", true);
+
+            System.out.println("Asal Pengiriman");
+            //Ketik provinsi asal
+            originProvinceIndex = getProvinceIndex(input);
+
+            //Pilih Kabupaten/ Kota asal
             System.out.println("Kabupaten/ Kota: ");
-            for (int i = 0; i < citiesOrRegencies[destinationProvinceIndex].length; i++) {
-                System.out.printf("%d. %s\n", i + 1, citiesOrRegencies[destinationProvinceIndex][i]);
+            for (int i = 0; i < citiesOrRegencies[originProvinceIndex].length; i++) {
+                System.out.printf("%d. %s\n", i + 1, citiesOrRegencies[originProvinceIndex][i]);
             }
-            destinationCityOrRegencyIndex = getCityOrRegencyIndex(destinationProvinceIndex, input);
+            originCityOrRegencyIndex = getCityOrRegencyIndex(originProvinceIndex, input);
 
-            //Pilih Kecamatan tujuan
+            //Pilih Kecamatan asal
             System.out.println("Kecamatan: ");
-            for (int i = 0; i < districts[destinationProvinceIndex][destinationCityOrRegencyIndex].length; i++) {
-                System.out.printf("%d. %s\n", i + 1, districts[destinationProvinceIndex][destinationCityOrRegencyIndex][i]);
+            for (int i = 0; i < districts[originProvinceIndex][originCityOrRegencyIndex].length; i++) {
+                System.out.printf("%d. %s\n", i + 1, districts[originProvinceIndex][originCityOrRegencyIndex][i]);
             }
-            destinationDistrictIndex = getDistrictIndex(destinationProvinceIndex, destinationCityOrRegencyIndex, input);
+            originDistrictIndex = getDistrictIndex(originProvinceIndex, originCityOrRegencyIndex, input);
 
-            //Hitung Jarak
-            latDestination = latLngs[destinationProvinceIndex][destinationCityOrRegencyIndex][destinationDistrictIndex][0];
-            lngDestination = latLngs[destinationProvinceIndex][destinationCityOrRegencyIndex][destinationDistrictIndex][1];
-            distance = calculateDistance(latOrigin, lngOrigin, latDestination, lngDestination);
-
-            if (distance == 0) System.out.println("Tujuan Pengiriman tidak boleh sama seperti asal!");
-        } while (distance == 0);
-
-        do {
-            //Pilih Jenis Barang
-            System.out.println("Jenis barang: ");
-            for (int i = 0; i < types.length; i++) {
-                System.out.printf("%d. %s \n", i + 1, types[i]);
-            }
-            packageTypes[packageAmount] = getTypeIndex(input);
-
-            //Masukkan Nama Barang
-            packageNames[packageAmount] = getStringValue(input, "nama barang: ", false);
-
-            //Masukkan Berat Barang
-            weights[packageAmount] = getWeight(input);
-
-            //Masukkan dimensi barang
-            dimensions[packageAmount] = getDimension(input, packageTypes[packageAmount], packageAmount);
-
-            //Pilih / tentukan packaging
-            packagingIndexes[packageAmount] = getPackagingIndex(input, packageTypes[packageAmount], dimensions[packageAmount], packageAmount);
-
-            //Menambah jumlah paket
-            packageAmount++;
-
-            //Validasi ketika batas maksimal barang yang ingin dikirim tercapai
-            if (packageAmount == maxInArray) break;
+            latOrigin = latLngs[originProvinceIndex][originCityOrRegencyIndex][originDistrictIndex][0];
+            lngOrigin = latLngs[originProvinceIndex][originCityOrRegencyIndex][originDistrictIndex][1];
 
             do {
-                System.out.print("Apakah ada barang lain? (y/t): ");
-                selected = Character.toLowerCase(input.next().charAt(0));
-                if (selected != 'y' && selected != 't') System.out.println("Masukkan pilihan yang sesuai!");
+                System.out.println("Tujuan Pengiriman");
+                //Ketik provinsi tujuan
+                destinationProvinceIndex = getProvinceIndex(input);
 
-            } while (selected != 'y' && selected != 't');
+                //Pilih Kabupaten/ Kota tujuan
+                System.out.println("Kabupaten/ Kota: ");
+                for (int i = 0; i < citiesOrRegencies[destinationProvinceIndex].length; i++) {
+                    System.out.printf("%d. %s\n", i + 1, citiesOrRegencies[destinationProvinceIndex][i]);
+                }
+                destinationCityOrRegencyIndex = getCityOrRegencyIndex(destinationProvinceIndex, input);
 
-        } while (selected == 'y');
+                //Pilih Kecamatan tujuan
+                System.out.println("Kecamatan: ");
+                for (int i = 0; i < districts[destinationProvinceIndex][destinationCityOrRegencyIndex].length; i++) {
+                    System.out.printf("%d. %s\n", i + 1, districts[destinationProvinceIndex][destinationCityOrRegencyIndex][i]);
+                }
+                destinationDistrictIndex = getDistrictIndex(destinationProvinceIndex, destinationCityOrRegencyIndex, input);
 
-        //Hitung total biaya sebelum biaya pelayanan
-        for (int i = 0; i < packageAmount; i++) {
-            weightAndDimension += dimensions[i] > 0 ? (int) Math.ceil(weights[i]) + (int) dimensions[i] : (int) Math.ceil(weights[i]);
-        }
+                //Hitung Jarak
+                latDestination = latLngs[destinationProvinceIndex][destinationCityOrRegencyIndex][destinationDistrictIndex][0];
+                lngDestination = latLngs[destinationProvinceIndex][destinationCityOrRegencyIndex][destinationDistrictIndex][1];
+                distance = calculateDistance(latOrigin, lngOrigin, latDestination, lngDestination);
 
-        //Pilih jenis pengiriman
-        System.out.println("Jenis pengiriman: ");
-        System.out.printf("%s \t\t\t %s \t\t\t\t\t\t %s \t\t %s", "No", "Nama", "Harga", "Estimasi\n");
-        for (int i = 0; i < services.length; i++) {
-            System.out.printf("%d \t %s \t\t %s \t\t %d-%d Hari\n", i + 1, services[i], convertRupiah(roundToNearestThousand(servicesPrice[i] * (int) distance * weightAndDimension)), servicesEstimatedTime[i][0], servicesEstimatedTime[i][1]);
-        }
-        serviceIndex = getServiceIndex(input);
+                if (distance == 0) System.out.println("Tujuan Pengiriman tidak boleh sama seperti asal!");
+            } while (distance == 0);
 
-        //Buat Nomor Resi
-        receiptNumber = generateReceiptNumber();
+            do {
+                //Pilih Jenis Barang
+                System.out.println("Jenis barang: ");
+                for (int i = 0; i < types.length; i++) {
+                    System.out.printf("%d. %s \n", i + 1, types[i]);
+                }
+                packageTypes[packageAmount] = getTypeIndex(input);
 
-        //Hitung total biaya packaging
-        packagingPrice = roundToNearestThousand((int) calculatePackagingPrice(surfaceAreas, packagingIndexes, packageAmount));
+                //Masukkan Nama Barang
+                packageNames[packageAmount] = getStringValue(input, "nama barang: ", false);
 
-        //Hitung sub total
-        subTotal = roundToNearestThousand(servicesPrice[serviceIndex] * (int) distance * weightAndDimension);
+                //Masukkan Berat Barang
+                weights[packageAmount] = getWeight(input);
 
-        //Hitung total dan packaging
-        total = subTotal + (int) packagingPrice;
+                //Masukkan dimensi barang
+                dimensions[packageAmount] = getDimension(input, packageTypes[packageAmount], packageAmount);
 
-        //Tampil data transaksi
-        printRecipients(senderName, senderAddress, senderPhone, receiverName, receiverAddress, receiverPhone);
-        printReceipt(receiptNumber, distance, packageAmount, packageNames, dimensions, weights, packagingIndexes, packagingPrice, subTotal, total, originProvinceIndex, originCityOrRegencyIndex, originDistrictIndex, destinationProvinceIndex, destinationCityOrRegencyIndex, destinationDistrictIndex, serviceIndex);
+                //Pilih / tentukan packaging
+                packagingIndexes[packageAmount] = getPackagingIndex(input, packageTypes[packageAmount], dimensions[packageAmount], packageAmount);
 
-        //Ambil uang
-        money = doTransaction(input, total);
+                //Menambah jumlah paket
+                packageAmount++;
 
-        //Tampil struk
-        printRecipients(senderName, senderAddress, senderPhone, receiverName, receiverAddress, receiverPhone);
-        printReceipt(receiptNumber, distance, packageAmount, packageNames, dimensions, weights, packagingIndexes, packagingPrice, subTotal, total, originProvinceIndex, originCityOrRegencyIndex, originDistrictIndex, destinationProvinceIndex, destinationCityOrRegencyIndex, destinationDistrictIndex, serviceIndex);
-        printBalance(total, money);
+                //Validasi ketika batas maksimal barang yang ingin dikirim tercapai
+                if (packageAmount == maxInArray) break;
+
+                do {
+                    System.out.print("Apakah ada barang lain? (y/t): ");
+                    selected = Character.toLowerCase(input.next().charAt(0));
+                    if (selected != 'y' && selected != 't') System.out.println("Masukkan pilihan yang sesuai!");
+
+                } while (selected != 'y' && selected != 't');
+
+            } while (selected == 'y');
+
+            //Hitung total biaya sebelum biaya pelayanan
+            for (int i = 0; i < packageAmount; i++) {
+                weightAndDimension += dimensions[i] > 0 ? (int) Math.ceil(weights[i]) + (int) dimensions[i] : (int) Math.ceil(weights[i]);
+            }
+
+            //Pilih jenis pengiriman
+            System.out.println("Jenis pengiriman: ");
+            System.out.printf("%s \t\t\t %s \t\t\t\t\t\t %s \t\t %s", "No", "Nama", "Harga", "Estimasi\n");
+            for (int i = 0; i < services.length; i++) {
+                System.out.printf("%d \t %s \t\t %s \t\t %d-%d Hari\n", i + 1, services[i], convertRupiah(roundToNearestThousand(servicesPrice[i] * (int) distance * weightAndDimension)), servicesEstimatedTime[i][0], servicesEstimatedTime[i][1]);
+            }
+            serviceIndex = getServiceIndex(input);
+
+            //Buat Nomor Resi
+            receiptNumber = generateReceiptNumber();
+
+            //Hitung total biaya packaging
+            packagingPrice = roundToNearestThousand((int) calculatePackagingPrice(surfaceAreas, packagingIndexes, packageAmount));
+
+            //Hitung sub total
+            subTotal = roundToNearestThousand(servicesPrice[serviceIndex] * (int) distance * weightAndDimension);
+
+            //Hitung total dan packaging
+            total = subTotal + (int) packagingPrice;
+
+            //Tampil data transaksi
+            printRecipients(senderName, senderAddress, senderPhone, receiverName, receiverAddress, receiverPhone);
+            printReceipt(receiptNumber, distance, packageAmount, packageNames, dimensions, weights, packagingIndexes, packagingPrice, subTotal, total, originProvinceIndex, originCityOrRegencyIndex, originDistrictIndex, destinationProvinceIndex, destinationCityOrRegencyIndex, destinationDistrictIndex, serviceIndex);
+
+            //Ambil uang
+            money = doTransaction(input, total);
+
+            //Tampil struk
+            printRecipients(senderName, senderAddress, senderPhone, receiverName, receiverAddress, receiverPhone);
+            printReceipt(receiptNumber, distance, packageAmount, packageNames, dimensions, weights, packagingIndexes, packagingPrice, subTotal, total, originProvinceIndex, originCityOrRegencyIndex, originDistrictIndex, destinationProvinceIndex, destinationCityOrRegencyIndex, destinationDistrictIndex, serviceIndex);
+            printBalance(total, money);
+
+
+            do{
+                System.out.print("Apakah anda ingin mengirim lagi? (y/t): ");
+                repeat = Character.toLowerCase(input.next().charAt(0));
+                input.nextLine();
+                if (repeat != 'y' && repeat != 't') System.out.println("Masukkan pilihan yang sesuai!");
+            }while (repeat != 'y' && repeat != 't');
+
+        } while (repeat == 'y');
     }
 
     private static String getStringValue(Scanner input, String command, boolean phoneNumber) {
@@ -530,7 +543,7 @@ public class Main {
     private static int getPackagingIndex(Scanner input, float typeIndex, float dimension, int packageAmount) {
         int index = 0, min = 0;
         if (typeIndex > 0 && dimension <= 5) {
-            if (dimension >= 0 && dimension <= 5 ) {
+            if (dimension >= 0 && dimension <= 5) {
                 //Kalau barang tapi tidak punya dimensi
                 System.out.println("Pilih Packaging");
                 for (int i = 1; i < packaging.length - 1; i++) {
